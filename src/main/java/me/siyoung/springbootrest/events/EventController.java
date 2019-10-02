@@ -35,17 +35,17 @@ public class EventController {
     EventValidator eventValidator;
 
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors){
-        if(errors.hasErrors()){
+    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+        if (errors.hasErrors()) {
             return badRequest(errors);
         }
-        eventValidator.validate(eventDto,errors);
-        if(errors.hasErrors()){
+        eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()) {
             return badRequest(errors);
         }
 
 
-        Event event = modelMapper.map(eventDto,Event.class);
+        Event event = modelMapper.map(eventDto, Event.class);
         event.updated();
         Event newEvent = eventRepository.save(event);
 
@@ -60,24 +60,46 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler pagedResourcesAssembler){
+    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler pagedResourcesAssembler) {
         Page<Event> page = this.eventRepository.findAll(pageable);
-        var pagedResources = pagedResourcesAssembler.toResource(page,e->new EventResource((Event) e));
+        var pagedResources = pagedResourcesAssembler.toResource(page, e -> new EventResource((Event) e));
         pagedResources.add(new Link("/docs/index.html#resources-events-list").withRel("profile"));
 
         return ResponseEntity.ok(pagedResources);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity getEvent(@PathVariable Integer id){
+    public ResponseEntity getEvent(@PathVariable Integer id) {
         Optional<Event> optionalEvent = this.eventRepository.findById(id);
-        if(optionalEvent.isEmpty()){
+        if (optionalEvent.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         Event event = optionalEvent.get();
         EventResource eventResource = new EventResource(event);
         eventResource.add(new Link("/docs/index.html#resources-event-get").withRel("profile"));
         return ResponseEntity.ok(eventResource);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateEvent(@PathVariable Integer id,
+                                      @RequestBody @Valid EventDto eventDto
+                                        ,Errors errors){
+        Optional<Event> byId = eventRepository.findById(id);
+        //검증 : 실패하는 테스트
+        if(byId.isEmpty())
+            return ResponseEntity.notFound().build();
+        if(errors.hasErrors())
+            return badRequest(errors);
+        eventValidator.validate(eventDto,errors);
+        if(errors.hasErrors())
+            return badRequest(errors);
+
+        Event existEvent = byId.get();
+        modelMapper.map(eventDto,existEvent);
+        EventResource eventResource = new EventResource(existEvent);
+        eventResource.add(new Link("/docs/index.html#resources-event-update").withRel("profile"));
+        return ResponseEntity.ok(eventResource);
+
     }
 
     private ResponseEntity badRequest(Errors errors) {

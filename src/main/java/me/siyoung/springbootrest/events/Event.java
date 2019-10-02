@@ -1,6 +1,7 @@
 package me.siyoung.springbootrest.events;
 
 import lombok.*;
+import me.siyoung.springbootrest.accounts.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -32,6 +33,9 @@ public class Event {
     private boolean free;
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
+
+    @ManyToOne
+    private Account manager;
 
     public void updated() {
         if(this.basePrice==0&&this.maxPrice==0){
