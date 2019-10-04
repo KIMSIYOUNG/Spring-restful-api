@@ -12,9 +12,5 @@ public class SpringbootrestApplication {
         SpringApplication.run(SpringbootrestApplication.class, args);
     }
 
-    @Bean
-    public ModelMapper modelMapper(){
-        return new ModelMapper();
-    }
 
 }
