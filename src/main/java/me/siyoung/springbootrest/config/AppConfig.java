@@ -3,6 +3,7 @@ package me.siyoung.springbootrest.config;
 import me.siyoung.springbootrest.accounts.Account;
 import me.siyoung.springbootrest.accounts.AccountRole;
 import me.siyoung.springbootrest.accounts.AccountService;
+import me.siyoung.springbootrest.common.AppProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -17,8 +18,12 @@ import java.util.Set;
 
 @Configuration
 public class AppConfig {
+
     @Autowired
     AccountService accountService;
+
+    @Autowired
+    AppProperties appProperties;
 
     @Bean
     public ModelMapper modelMapper(){
@@ -34,8 +39,8 @@ public class AppConfig {
             @Override
             public void run(ApplicationArguments args) throws Exception {
                 Account keesun = Account.builder()
-                        .email("keesun@gmail.com")
-                        .password("keesun")
+                        .email(appProperties.getAdminUsername())
+                        .password(appProperties.getAdminPassword())
                         .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                         .build();
                 accountService.saveAccount(keesun);
